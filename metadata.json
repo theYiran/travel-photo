@@ -1,0 +1,5 @@
+{
+  "name": "Wanderlust: Travel Photo Journey",
+  "description": "Visualize your travel memories on an interactive map. Upload photos with GPS data to automatically map your journey, or manually place them to recreate your path.",
+  "requestFramePermissions": []
+}

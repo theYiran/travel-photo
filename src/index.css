@@ -1,0 +1,45 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap');
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Cormorant Garamond", serif;
+}
+
+body {
+  @apply bg-black text-white font-sans antialiased;
+  overflow: hidden;
+}
+
+.leaflet-container {
+  background: #050505 !important;
+}
+
+.leaflet-tile-pane {
+  filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+}
+
+.custom-marker {
+  @apply relative flex items-center justify-center;
+}
+
+.marker-pin {
+  @apply w-10 h-10 rounded-full border-2 border-white/50 overflow-hidden shadow-lg transition-transform duration-300 hover:scale-125 hover:z-50;
+}
+
+.marker-pin img {
+  @apply w-full h-full object-cover;
+}
+
+.glass-panel {
+  @apply bg-black/40 backdrop-blur-xl border border-white/10;
+}
+
+/* Hide scrollbar but keep functionality */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
