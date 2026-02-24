@@ -153,6 +153,7 @@ export default function App() {
       </motion.aside>
 
       <main className="flex-1 relative bg-[#050505]">
+        {/* Background Layer: Photo or Map */}
         <AnimatePresence mode="wait">
           {selectedPhoto ? (
             <motion.div
@@ -167,7 +168,7 @@ export default function App() {
                 className="w-full h-full object-cover" 
                 alt={selectedPhoto.name}
               />
-              <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/90" />
+              <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
             </motion.div>
           ) : (
             <motion.div
@@ -188,30 +189,33 @@ export default function App() {
           )}
         </AnimatePresence>
 
-        {/* Mini Map Pop-up when photo is selected */}
+        {/* Overlay Layer: Transparent Map showing path when photo is selected */}
         <AnimatePresence>
           {selectedPhoto && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.8, x: 20, y: -20 }}
-              animate={{ opacity: 1, scale: 1, x: 0, y: 0 }}
-              exit={{ opacity: 0, scale: 0.8, x: 20, y: -20 }}
-              className="absolute top-8 right-8 z-[1001] w-72 h-48 rounded-2xl overflow-hidden border border-white/20 shadow-2xl backdrop-blur-xl"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 z-10 pointer-events-none"
             >
               <PhotoMap 
                 photos={photos} 
                 selectedPhoto={selectedPhoto}
-                onPhotoSelect={(p) => setSelectedPhotoId(p.id)}
-                onLocationSelect={handleLocationSelect}
-                isPickingLocation={isPickingLocation}
-                isMiniMap={true}
+                onPhotoSelect={() => {}} // Disabled in overlay
+                onLocationSelect={() => {}} // Disabled in overlay
+                isPickingLocation={false}
                 transparentMap={true}
               />
-              <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest text-white/80 pointer-events-none">
-                Live Map
-              </div>
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Mini Map Pop-up (Optional, maybe remove if we have the overlay?) 
+            Actually the user said "make the map pop up on top". 
+            Maybe they meant the mini map I already added? 
+            "Make the map transparent, only display my path." 
+            This sounds like the overlay.
+        */}
 
         <AnimatePresence>
           {!selectedPhoto && (
@@ -239,45 +243,54 @@ export default function App() {
               exit={{ opacity: 0, y: 20 }}
               className="absolute bottom-12 left-1/2 -translate-x-1/2 z-[1000] w-full max-w-2xl px-6"
             >
-              <div className="glass-panel rounded-2xl overflow-hidden shadow-2xl border border-white/5 backdrop-blur-3xl bg-black/20">
-                <div className="px-8 py-6">
-                  <div className="flex items-center justify-between gap-6">
+              <div className="glass-panel rounded-xl overflow-hidden shadow-2xl border border-white/5 backdrop-blur-3xl bg-black/20">
+                <div className="px-6 py-4">
+                  <div className="flex items-center justify-between gap-8">
                     <div className="flex-1">
                       <motion.h3 
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className="text-xl font-serif italic mb-1 text-white/90"
+                        className="text-lg font-serif italic mb-0.5 text-white/90"
                       >
                         {selectedPhoto.name}
                       </motion.h3>
-                      <div className="flex items-center gap-3 text-white/40 text-[10px] uppercase tracking-[0.15em] font-medium">
+                      <div className="flex items-center gap-4 text-white/40 text-[9px] uppercase tracking-[0.2em] font-medium">
                         <span className="flex items-center gap-1">
-                          <Calendar className="w-3 h-3" />
+                          <Calendar className="w-2.5 h-2.5" />
                           {format(selectedPhoto.timestamp, 'MMM dd, yyyy')}
                         </span>
-                        {selectedPhoto.lat && (
+                        <div className="flex items-center gap-2 group/loc">
                           <span className="flex items-center gap-1">
-                            <MapPin className="w-3 h-3" />
-                            {selectedPhoto.lat.toFixed(3)}°N, {selectedPhoto.lng?.toFixed(3)}°E
+                            <MapPin className="w-2.5 h-2.5" />
+                            {selectedPhoto.lat ? `${selectedPhoto.lat.toFixed(3)}°, ${selectedPhoto.lng?.toFixed(3)}°` : 'No Location'}
                           </span>
-                        )}
+                          <button 
+                            onClick={() => {
+                              setPendingPhotoId(selectedPhoto.id);
+                              setIsPickingLocation(true);
+                            }}
+                            className="text-[8px] px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 text-white/60 transition-colors border border-white/5"
+                          >
+                            Edit
+                          </button>
+                        </div>
                       </div>
                     </div>
                     
-                    <div className="flex gap-2">
+                    <div className="flex gap-1.5">
                       <button 
                         onClick={prevPhoto}
                         disabled={currentIndex === 0}
-                        className="w-10 h-10 rounded-full bg-white/5 border border-white/5 flex items-center justify-center hover:bg-white/10 disabled:opacity-10 transition-all backdrop-blur-md"
+                        className="w-8 h-8 rounded-full bg-white/5 border border-white/5 flex items-center justify-center hover:bg-white/10 disabled:opacity-10 transition-all"
                       >
-                        <ChevronLeft className="w-5 h-5" />
+                        <ChevronLeft className="w-4 h-4" />
                       </button>
                       <button 
                         onClick={nextPhoto}
                         disabled={currentIndex === sortedPhotos.length - 1}
-                        className="w-10 h-10 rounded-full bg-white/5 border border-white/5 flex items-center justify-center hover:bg-white/10 disabled:opacity-10 transition-all backdrop-blur-md"
+                        className="w-8 h-8 rounded-full bg-white/5 border border-white/5 flex items-center justify-center hover:bg-white/10 disabled:opacity-10 transition-all"
                       >
-                        <ChevronRight className="w-5 h-5" />
+                        <ChevronRight className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
@@ -285,9 +298,9 @@ export default function App() {
 
                 <button 
                   onClick={() => setSelectedPhotoId(null)}
-                  className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/20 hover:bg-black/40 backdrop-blur-xl border border-white/5 flex items-center justify-center transition-all"
+                  className="absolute top-3 right-3 w-6 h-6 rounded-full bg-black/20 hover:bg-black/40 backdrop-blur-xl border border-white/5 flex items-center justify-center transition-all"
                 >
-                  <Plus className="w-4 h-4 rotate-45" />
+                  <Plus className="w-3.5 h-3.5 rotate-45" />
                 </button>
               </div>
             </motion.div>

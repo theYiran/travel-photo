@@ -102,43 +102,62 @@ export const PhotoMap: React.FC<PhotoMapProps> = ({
         {/* Travel Path */}
         <TravelPath photos={photosWithLocation} />
 
-        {photosWithLocation.map((photo, index) => (
-          <Marker 
-            key={photo.id}
-            {...({
-              anchor: [photo.lat!, photo.lng!],
-              onClick: () => onPhotoSelect(photo)
-            } as any)}
-          >
-            <div className={`
-              relative group cursor-pointer transition-all duration-500
-              ${selectedPhoto?.id === photo.id ? 'z-50 scale-125' : 'z-10 hover:scale-110'}
-              ${isMiniMap && selectedPhoto?.id !== photo.id ? 'opacity-40 scale-75' : ''}
-            `}>
-              <div className={`
-                absolute -inset-4 rounded-full blur-2xl transition-opacity duration-700
-                ${selectedPhoto?.id === photo.id ? 'bg-white/30 opacity-100' : 'bg-white/10 opacity-0 group-hover:opacity-100'}
-              `} />
-              
-              <div className={`
-                relative ${isMiniMap ? 'w-8 h-8 rounded-lg' : 'w-12 h-12 rounded-2xl'} border-2 overflow-hidden shadow-2xl transition-all duration-500
-                ${selectedPhoto?.id === photo.id ? 'border-white ring-8 ring-white/10' : 'border-white/30 group-hover:border-white/60'}
-              `}>
-                <img src={photo.url} className="w-full h-full object-cover" />
-                {!isMiniMap && (
-                  <div className="absolute top-1 left-1 bg-black/60 backdrop-blur-md text-[7px] font-bold px-1 py-0.5 rounded border border-white/10 text-white/90">
-                    {index + 1}
-                  </div>
-                )}
-              </div>
+        {photosWithLocation.map((photo, index) => {
+          const isSelected = selectedPhoto?.id === photo.id;
+          
+          if (transparentMap && !isSelected) {
+            return (
+              <Marker 
+                {...({
+                  key: photo.id,
+                  anchor: [photo.lat!, photo.lng!]
+                } as any)}
+              >
+                <div className="w-1 h-1 bg-white/20 rounded-full" />
+              </Marker>
+            );
+          }
 
+          return (
+            <Marker 
+              {...({
+                key: photo.id,
+                anchor: [photo.lat!, photo.lng!],
+                onClick: () => onPhotoSelect(photo)
+              } as any)}
+            >
               <div className={`
-                absolute -bottom-2 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full shadow-[0_0_10px_rgba(255,255,255,0.8)]
-                ${selectedPhoto?.id === photo.id ? 'bg-white scale-150' : 'bg-white/40'}
-              `} />
-            </div>
-          </Marker>
-        ))}
+                relative group cursor-pointer transition-all duration-500
+                ${isSelected ? 'z-50 scale-125' : 'z-10 hover:scale-110'}
+                ${isMiniMap && !isSelected ? 'opacity-40 scale-75' : ''}
+                ${transparentMap && isSelected ? 'scale-75 opacity-80' : ''}
+              `}>
+                <div className={`
+                  absolute -inset-4 rounded-full blur-2xl transition-opacity duration-700
+                  ${isSelected ? 'bg-white/30 opacity-100' : 'bg-white/10 opacity-0 group-hover:opacity-100'}
+                `} />
+                
+                <div className={`
+                  relative ${isMiniMap ? 'w-8 h-8 rounded-lg' : 'w-12 h-12 rounded-2xl'} border-2 overflow-hidden shadow-2xl transition-all duration-500
+                  ${isSelected ? 'border-white ring-8 ring-white/10' : 'border-white/30 group-hover:border-white/60'}
+                  ${transparentMap ? 'border-white/50 ring-0' : ''}
+                `}>
+                  <img src={photo.url} className="w-full h-full object-cover" />
+                  {!isMiniMap && !transparentMap && (
+                    <div className="absolute top-1 left-1 bg-black/60 backdrop-blur-md text-[7px] font-bold px-1 py-0.5 rounded border border-white/10 text-white/90">
+                      {index + 1}
+                    </div>
+                  )}
+                </div>
+
+                <div className={`
+                  absolute -bottom-2 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full shadow-[0_0_10px_rgba(255,255,255,0.8)]
+                  ${isSelected ? 'bg-white scale-150' : 'bg-white/40'}
+                `} />
+              </div>
+            </Marker>
+          );
+        })}
       </Map>
 
       {!isMiniMap && <div className="absolute inset-0 pointer-events-none z-10 shadow-[inset_0_0_200px_rgba(0,0,0,0.9)]" />}
